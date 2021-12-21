@@ -1,0 +1,25 @@
+sudo:required
+services:
+  - docker
+
+
+before_install:
+  - docker build -t fsartori68/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run fsartori68/react-tet npm test -- --coverage
+
+after_success:
+  - docker build -t fsartori68/multi-client ./client
+  - docker build -t fsartori68/multi-server ./server
+  - docker build -t fsartori68/multi-nginx ./nginx
+  - docker build -t fsartori68/multi-worker ./worker
+
+  # Log in to the Docker Cli
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin 
+  # Take those images in Docker hub
+  - docker push fsartori68/multi-client
+  - docker push fsartori68/multi-nginx
+  - docker push fsartori68/multi-server
+  - docker push fsartori68/multi-worker
+         
